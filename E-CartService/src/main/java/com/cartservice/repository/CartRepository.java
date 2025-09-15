@@ -9,6 +9,8 @@ import com.cartservice.model.Cart;
 
 public interface CartRepository extends JpaRepository<Cart, Long> {
 	List<Cart> findByUserId(Long userId);
+	Cart findByUserIdAndProductName(Long userId, String productName);
+
 //	List<Cart> findByUserId(Long userId);
 //	Optional<Cart> findByUserIdAndProductName(Long userId, String productName);
 //	List<Cart> findByUser(User user);

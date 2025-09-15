@@ -19,11 +19,19 @@ public class CartService {
     private UserClient userClient; // 👈 Feign client
 
     public Cart addToCart(Long userId, CartDto dto) {
-        // ✅ check user existence using Feign
         if (!userClient.userExists(userId)) {
             throw new RuntimeException("User not found with id: " + userId);
         }
 
+        // 🔎 Check if same product already exists
+        Cart existing = cartRepository.findByUserIdAndProductName(userId, dto.getProductName());
+        if (existing != null) {
+            existing.setQuantity(existing.getQuantity() + dto.getQuantity());
+            existing.setTotal(existing.getPrice() * existing.getQuantity());
+            return cartRepository.save(existing);
+        }
+
+        // else, create new row
         Cart cart = new Cart();
         cart.setUserId(userId);
         cart.setProductName(dto.getProductName());
@@ -41,5 +49,14 @@ public class CartService {
 
     public void removeFromCart(Long cartId) {
         cartRepository.deleteById(cartId);
+    }
+    public Cart updateQuantity(Long cartId, int quantity) {
+        Cart item = cartRepository.findById(cartId)
+                .orElseThrow(() -> new RuntimeException("Cart item not found with id: " + cartId));
+
+        item.setQuantity(quantity);
+        item.setTotal(item.getPrice() * quantity);
+
+        return cartRepository.save(item);
     }
 }

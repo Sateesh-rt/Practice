@@ -3,6 +3,8 @@ package com.userservice.services;
 import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.userservice.model.User;
@@ -13,15 +15,24 @@ public class UserService {
 
     @Autowired
     private UserRepository userRepository;
+   
+    private  BCryptPasswordEncoder passwordEncoder=new BCryptPasswordEncoder();
 
     // 🔹 Register new user
     public User saveUser(User user) {
+    	String encodedPassword = passwordEncoder.encode(user.getPassword());
+        user.setPassword(encodedPassword);
         return userRepository.save(user);
     }
 
     // 🔹 Login (simple matching for now)
     public User login(String name, String password, String role) {
-        return userRepository.getUserDetailsByRole(role, name, password);
+        User user = userRepository.getUserByNameAndRole(name, role);
+
+        if (user != null && passwordEncoder.matches(password, user.getPassword())) {
+            return user; // login success
+        }
+        return null; // login fail
     }
 
     // 🔹 Fetch by ID

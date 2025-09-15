@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import com.cartservice.dto.CartDto;
 import com.cartservice.model.Cart;
+import com.cartservice.repository.CartRepository;
 import com.cartservice.services.CartService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -28,6 +29,8 @@ public class CartController {
 
     @Autowired
     private ObjectMapper objectMapper;
+    @Autowired
+    private CartRepository cartRepository;
 
     // ✅ Add product to user's cart (check user via Feign)
     @PostMapping("/add/{userId}")
@@ -73,5 +76,17 @@ public class CartController {
     @GetMapping("/{userId}/items")
     public List<Cart> getCartItems(@PathVariable Long userId) {
         return cartService.getCartByUser(userId);
+    }
+//    @PutMapping("/update/{cartItemId}")
+//    public Cart updateQuantity(@PathVariable Long cartItemId, @RequestParam int quantity) {
+//        return cartService.updateQuantity(cartItemId, quantity);
+//    }
+    @PutMapping("/update/{cartId}/{quantity}")
+    public ResponseEntity<Cart> updateQuantity(
+            @PathVariable Long cartId,
+            @PathVariable int quantity) {
+
+        Cart updatedCart = cartService.updateQuantity(cartId, quantity);
+        return ResponseEntity.ok(updatedCart);
     }
 }
